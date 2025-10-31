@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management API – Test Dashboard</title>
+    <style>
+        body {font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg,#667eea,#764ba2); min-height:100vh; padding:40px;}
+        .container {max-width:1000px; margin:auto; background:#fff; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+        .header {background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:40px; text-align:center;}
+        .card-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; padding:40px;}
+        .card {background:#f8f9fa; border-radius:15px; padding:30px; text-align:center;}
+        a {display:inline-block; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:12px 30px; border-radius:25px; text-decoration:none;}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header"><h1>🚀 Task Management API</h1><p>Test Dashboard & Quality Reports</p></div>
+        <div class="card-grid">
+            <div class="card"><h3>📊 Code Coverage</h3><a href="coverage/index.html">Coverage öffnen</a></div>
+            <div class="card"><h3>🧪 Unit Tests</h3><a href="test-reports/">Test Reports öffnen</a></div>
+            <div class="card"><h3>🔍 SonarCloud</h3><a href="https://sonarcloud.io/project/overview?id=LevinWiederkehr_Task-Management-API" target="_blank">SonarCloud Dashboard</a></div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Task Management API</a> &gt; <a href="index.source.html" class="el_package">com.taskapi.service</a> &gt; <span class="el_source">TaskService.java</span></div><h1>TaskService.java</h1><pre class="source lang-java linenums">package com.taskapi.service;
+
+import com.taskapi.model.Task;
+import com.taskapi.model.Task.Priority;
+import com.taskapi.model.Task.TaskStatus;
+import com.taskapi.repository.TaskRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * TaskService - Business Logic für Task-Management
+ *
+ * GREEN PHASE: Implementierung, um alle Tests zu erfüllen
+ */
+@Service
+<span class="fc" id="L23">@RequiredArgsConstructor</span>
+<span class="fc" id="L24">@Slf4j</span>
+@Transactional
+public class TaskService {
+
+    private final TaskRepository taskRepository;
+
+    // Comparator für Prioritäts-Sortierung (HIGH zuerst)
+<span class="fc" id="L31">    private static final Comparator&lt;Task&gt; PRIORITY_COMPARATOR =</span>
+<span class="fc" id="L32">            Comparator.comparing(Task::getPriority, Comparator.reverseOrder());</span>
+
+    /**
+     * Erstellt eine neue Task
+     * (Test 1, 5)
+     */
+    public Task createTask(Task task) {
+<span class="fc" id="L39">        log.info(&quot;Creating new task: {}&quot;, task.getTitle());</span>
+
+        // Validierung
+<span class="pc bpc" id="L42" title="1 of 4 branches missed.">        if (task.getTitle() == null || task.getTitle().trim().isEmpty()) {</span>
+<span class="fc" id="L43">            throw new IllegalArgumentException(&quot;Task title cannot be empty&quot;);</span>
+        }
+
+        // Default-Werte setzen
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (task.getStatus() == null) {</span>
+<span class="nc" id="L48">            task.setStatus(TaskStatus.TODO);</span>
+        }
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">        if (task.getPriority() == null) {</span>
+<span class="nc" id="L51">            task.setPriority(Priority.MEDIUM);</span>
+        }
+
+<span class="fc" id="L54">        Task savedTask = taskRepository.save(task);</span>
+<span class="fc" id="L55">        log.info(&quot;Task created successfully with ID: {}&quot;, savedTask.getId());</span>
+<span class="fc" id="L56">        return savedTask;</span>
+    }
+
+    /**
+     * Sortiert Tasks nach Priorität
+     * (Test 2)
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Task&gt; sortByPriority(List&lt;Task&gt; tasks) {
+<span class="fc" id="L65">        log.info(&quot;Sorting tasks by priority&quot;);</span>
+<span class="fc" id="L66">        return tasks.stream()</span>
+<span class="fc" id="L67">                .sorted(PRIORITY_COMPARATOR)</span>
+<span class="fc" id="L68">                .collect(Collectors.toList());</span>
+    }
+
+    /**
+     * Holt alle Tasks
+     * (Test 6)
+     */
+    @Transactional(readOnly = true)
+    public List&lt;Task&gt; getAllTasks() {
+<span class="fc" id="L77">        log.info(&quot;Fetching all tasks&quot;);</span>
+<span class="fc" id="L78">        return taskRepository.findAll();</span>
+    }
+
+    /**
+     * Holt eine Task per ID (optional für interne Nutzung)
+     */
+    @Transactional(readOnly = true)
+    public Task getTask(Long id) {
+<span class="nc" id="L86">        log.info(&quot;Fetching task with ID: {}&quot;, id);</span>
+<span class="nc" id="L87">        return taskRepository.findById(id)</span>
+<span class="nc" id="L88">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Task not found with ID: &quot; + id));</span>
+    }
+
+    /**
+     * Aktualisiert den Status einer Task
+     * (Test 4)
+     */
+    public Task updateTaskStatus(Long id, TaskStatus newStatus) {
+<span class="fc" id="L96">        log.info(&quot;Updating status for task ID: {} to {}&quot;, id, newStatus);</span>
+<span class="fc" id="L97">        Task existingTask = taskRepository.findById(id)</span>
+<span class="pc" id="L98">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Task not found with ID: &quot; + id));</span>
+
+<span class="fc" id="L100">        existingTask.setStatus(newStatus);</span>
+<span class="fc" id="L101">        return taskRepository.save(existingTask);</span>
+    }
+
+    /**
+     * Löscht eine Task per ID
+     * (Test 7)
+     */
+    public void deleteTask(Long id) {
+<span class="fc" id="L109">        log.info(&quot;Deleting task with ID: {}&quot;, id);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        if (!taskRepository.existsById(id)) {</span>
+<span class="fc" id="L111">            throw new IllegalArgumentException(&quot;Cannot delete non-existent task with ID: &quot; + id);</span>
+        }
+<span class="fc" id="L113">        taskRepository.deleteById(id);</span>
+<span class="fc" id="L114">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

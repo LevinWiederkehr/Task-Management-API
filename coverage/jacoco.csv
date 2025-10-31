@@ -1,0 +1,6 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+Task Management API,com.taskapi,TaskManagementAPIApplication,5,3,0,0,2,1,1,1,1,1
+Task Management API,com.taskapi.model,Task.Priority,6,38,0,0,2,8,2,2,2,2
+Task Management API,com.taskapi.model,Task,377,89,71,3,10,23,52,12,16,11
+Task Management API,com.taskapi.model,Task.TaskStatus,3,32,0,0,1,7,1,2,1,2
+Task Management API,com.taskapi.service,TaskService,31,112,3,7,5,28,6,9,3,7
