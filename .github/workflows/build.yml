@@ -1,0 +1,89 @@
+name: Build, Test & SonarCloud Analysis
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build, Test & Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Build
+        run: mvn -B clean compile
+
+      - name: Run Unit Tests
+        run: mvn -B test
+
+      - name: SonarCloud Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B verify sonar:sonar \
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+
+      - name: Generate Dashboard
+        run: |
+          mkdir -p public/coverage
+          mkdir -p public/test-reports
+          cp -r target/site/jacoco/* public/coverage/ || echo "No coverage reports"
+          cp -r target/surefire-reports/* public/test-reports/ || echo "No test reports"
+
+          cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html lang="de">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Task Management API – Test Dashboard</title>
+              <style>
+                  body {font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg,#667eea,#764ba2); min-height:100vh; padding:40px;}
+                  .container {max-width:1000px; margin:auto; background:#fff; border-radius:20px; box-shadow:0 20px 60px rgba(0,0,0,.3);}
+                  .header {background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:40px; text-align:center;}
+                  .card-grid {display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px; padding:40px;}
+                  .card {background:#f8f9fa; border-radius:15px; padding:30px; text-align:center;}
+                  a {display:inline-block; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:12px 30px; border-radius:25px; text-decoration:none;}
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <div class="header"><h1>🚀 Task Management API</h1><p>Test Dashboard & Quality Reports</p></div>
+                  <div class="card-grid">
+                      <div class="card"><h3>📊 Code Coverage</h3><a href="coverage/index.html">Coverage öffnen</a></div>
+                      <div class="card"><h3>🧪 Unit Tests</h3><a href="test-reports/">Test Reports öffnen</a></div>
+                      <div class="card"><h3>🔍 SonarCloud</h3><a href="https://sonarcloud.io/project/overview?id=${{ secrets.SONAR_PROJECT_KEY }}" target="_blank">SonarCloud Dashboard</a></div>
+                  </div>
+              </div>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy Dashboard to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
