@@ -23,6 +23,7 @@
         <jacoco.version>0.8.11</jacoco.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <sonar.organization>levinwiederkehr</sonar.organization>
     </properties>
 
     <dependencies>
