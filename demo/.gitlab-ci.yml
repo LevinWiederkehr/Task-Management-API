@@ -1,0 +1,167 @@
+image: maven:3.9.5-eclipse-temurin-17
+
+# Pipeline Stages
+stages:
+  - build
+  - test
+  - coverage
+  - deploy
+
+# Cache Maven Dependencies
+cache:
+  paths:
+    - .m2/repository/
+    - target/
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+# Build Stage
+build:
+  stage: build
+  script:
+    - echo "Building the application..."
+    - mvn $MAVEN_CLI_OPTS clean compile
+  artifacts:
+    paths:
+      - target/classes/
+    expire_in: 1 hour
+
+# Unit Tests Stage
+unit-tests:
+  stage: test
+  script:
+    - echo "Running unit tests..."
+    - mvn $MAVEN_CLI_OPTS test
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - target/surefire-reports/TEST-*.xml
+    paths:
+      - target/surefire-reports/
+      - target/test-classes/
+    expire_in: 1 week
+  coverage: '/Total.*?([0-9]{1,3})%/'
+
+# Code Coverage Stage
+code-coverage:
+  stage: coverage
+  dependencies:
+    - unit-tests
+  script:
+    - echo "Generating code coverage report..."
+    - mvn $MAVEN_CLI_OPTS jacoco:report
+    - echo "Coverage report generated!"
+    - cat target/site/jacoco/index.html | grep -o 'Total[^%]*%' || true
+  artifacts:
+    paths:
+      - target/site/jacoco/
+    expire_in: 1 week
+  coverage: '/Total.*?([0-9]{1,3})%/'
+
+# Deploy Reports to GitLab Pages
+pages:
+  stage: deploy
+  dependencies:
+    - code-coverage
+    - unit-tests
+  script:
+    - echo "Deploying test reports and coverage to GitLab Pages..."
+    - mkdir -p public/coverage
+    - mkdir -p public/test-reports
+    - cp -r target/site/jacoco/* public/coverage/ || echo "No coverage reports"
+    - cp -r target/surefire-reports/* public/test-reports/ || echo "No test reports"
+    - |
+      cat > public/index.html << 'EOF'
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Task Management API - Test Reports</title>
+          <style>
+              body {
+                  font-family: Arial, sans-serif;
+                  max-width: 800px;
+                  margin: 50px auto;
+                  padding: 20px;
+                  background: #f5f5f5;
+              }
+              .container {
+                  background: white;
+                  padding: 30px;
+                  border-radius: 10px;
+                  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+              }
+              h1 {
+                  color: #333;
+                  border-bottom: 3px solid #4CAF50;
+                  padding-bottom: 10px;
+              }
+              .links {
+                  margin-top: 30px;
+              }
+              .link-card {
+                  background: #f9f9f9;
+                  padding: 20px;
+                  margin: 15px 0;
+                  border-radius: 5px;
+                  border-left: 4px solid #4CAF50;
+              }
+              .link-card a {
+                  color: #4CAF50;
+                  text-decoration: none;
+                  font-size: 18px;
+                  font-weight: bold;
+              }
+              .link-card a:hover {
+                  text-decoration: underline;
+              }
+              .description {
+                  color: #666;
+                  margin-top: 5px;
+              }
+          </style>
+      </head>
+      <body>
+          <div class="container">
+              <h1>🚀 Task Management API - Test Reports</h1>
+              <p>Willkommen zu den automatisierten Test-Reports des Task Management API Projekts.</p>
+      
+              <div class="links">
+                  <div class="link-card">
+                      <a href="coverage/index.html">📊 Code Coverage Report</a>
+                      <p class="description">JaCoCo Code Coverage Analyse - zeigt die Testabdeckung des Projekts</p>
+                  </div>
+      
+                  <div class="link-card">
+                      <a href="test-reports/">🧪 Unit Test Reports</a>
+                      <p class="description">Surefire Test Reports - detaillierte Testergebnisse aller Unit Tests</p>
+                  </div>
+              </div>
+      
+              <p style="margin-top: 30px; color: #888; font-size: 14px;">
+                  Letzte Aktualisierung: <span id="date"></span>
+              </p>
+          </div>
+          <script>
+              document.getElementById('date').textContent = new Date().toLocaleString('de-CH');
+          </script>
+      </body>
+      </html>
+      EOF
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+    - develop
+
+# Optional: Fail if coverage is below threshold
+coverage-check:
+  stage: coverage
+  dependencies:
+    - unit-tests
+  script:
+    - mvn $MAVEN_CLI_OPTS jacoco:check
+  allow_failure: true
