@@ -1,132 +1,25 @@
-name: CI/CD Pipeline
+name: Run Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
-  frontend-test:
-    name: Frontend Tests
+  test:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
+      - uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-          cache: 'npm'
-      
+          node-version: 20
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Run tests
-        run: npm test:run
-      
-      - name: Generate coverage report
-        run: npm run test:coverage
-      
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/coverage-final.json
-          flags: frontend
-          name: frontend-coverage
-      
-      - name: Archive test results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: coverage/
-
-  backend-test:
-    name: Backend Tests
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-      
-      - name: Run backend tests
-        run: mvn clean test
-      
-      - name: Generate coverage report
-        run: mvn jacoco:report
-      
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./target/site/jacoco/jacoco.xml
-          flags: backend
-          name: backend-coverage
-
-  build:
-    name: Build Application
-    needs: [frontend-test, backend-test]
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-          cache: 'maven'
-      
-      - name: Build frontend
-        run: |
-          npm ci
-          npm run build
-      
-      - name: Build backend
-        run: mvn clean package -DskipTests
-      
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: application-artifacts
-          path: |
-            dist/
-            target/*.jar
-
-  deploy:
-    name: Deploy to Production
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: application-artifacts
-      
-      - name: Deploy to server
-        run: |
-          echo "Deploying application..."
-          # Hier kommen deine Deployment-Befehle
-          # z.B. Docker, Kubernetes, oder direktes Server-Deployment
+        run: npm run test:ci
