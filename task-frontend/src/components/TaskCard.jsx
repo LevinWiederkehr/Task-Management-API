@@ -1,22 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import axios from "axios";
 
-export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
-  const priorityColors = {
-    LOW: 'green',
-    MEDIUM: 'orange',
-    HIGH: 'red',
-  };
-
+export default function TaskCard({ task, onEdit, onDelete, onUpdate }) {
   const [status, setStatus] = useState(task.status);
 
-  const handleStatusChange = (e) => {
+  const priorityColors = {
+    LOW: "#48bb78",
+    MEDIUM: "#ed8936",
+    HIGH: "#f56565",
+  };
+
+  const handleStatusChange = async (e) => {
     const newStatus = e.target.value;
     setStatus(newStatus);
-    if (onStatusChange) onStatusChange({ ...task, status: newStatus });
+    try {
+      await axios.put(`http://localhost:8080/api/tasks/${task.id}`, {
+        ...task,
+        status: newStatus,
+      });
+      onUpdate();
+    } catch (err) {
+      console.error("Fehler beim Statuswechsel:", err);
+    }
   };
 
   return (
-    <div className="task-card">
+    <div className="task-card" data-priority={task.priority}>
       <div className="task-card-header">
         <h2>{task.title}</h2>
         <span
@@ -30,8 +39,8 @@ export default function TaskCard({ task, onEdit, onDelete, onStatusChange }) {
 
       <div className="task-footer">
         <div>
-          Status:
-          <select value={status} onChange={handleStatusChange}>
+          <label>Status:</label>
+          <select value={status || "TODO"} onChange={handleStatusChange}>
             <option value="TODO">To Do</option>
             <option value="IN_PROGRESS">In Progress</option>
             <option value="DONE">Done</option>

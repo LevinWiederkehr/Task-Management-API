@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 export default function TaskForm({ onSubmit, editingTask, cancelEdit }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('MEDIUM');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [priority, setPriority] = useState("MEDIUM");
 
   useEffect(() => {
     if (editingTask) {
-      setTitle(editingTask.title);
-      setDescription(editingTask.description);
-      setPriority(editingTask.priority);
+      setTitle(editingTask.title || "");
+      setDescription(editingTask.description || "");
+      setPriority(editingTask.priority || "MEDIUM");
     } else {
-      setTitle('');
-      setDescription('');
-      setPriority('MEDIUM');
+      setTitle("");
+      setDescription("");
+      setPriority("MEDIUM");
     }
   }, [editingTask]);
 
@@ -25,11 +25,8 @@ export default function TaskForm({ onSubmit, editingTask, cancelEdit }) {
       title,
       description,
       priority,
-      status: editingTask?.status || 'TODO',
+      status: editingTask?.status || "TODO",
     });
-    setTitle('');
-    setDescription('');
-    setPriority('MEDIUM');
   };
 
   return (
@@ -51,8 +48,12 @@ export default function TaskForm({ onSubmit, editingTask, cancelEdit }) {
         <option value="MEDIUM">Mittel</option>
         <option value="HIGH">Hoch</option>
       </select>
-      <button type="submit">{editingTask ? 'Speichern' : 'Erstellen'}</button>
-      {editingTask && <button type="button" onClick={cancelEdit}>Abbrechen</button>}
+      <button type="submit">{editingTask ? "Speichern" : "Erstellen"}</button>
+      {editingTask && (
+        <button type="button" onClick={cancelEdit}>
+          Abbrechen
+        </button>
+      )}
     </form>
   );
 }
