@@ -5,134 +5,108 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * Task Entity - Repräsentiert eine Aufgabe im System
- */
 @Entity
 @Table(name = &quot;tasks&quot;)
-<span class="pc bnc" id="L17" title="All 70 branches missed.">@Data</span>
-<span class="fc" id="L18">@NoArgsConstructor</span>
-<span class="nc" id="L19">@AllArgsConstructor</span>
+<span class="pc bnc" id="L15" title="All 70 branches missed.">@Data</span>
+<span class="fc" id="L16">@NoArgsConstructor</span>
+<span class="nc" id="L17">@AllArgsConstructor</span>
 public class Task {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-<span class="fc" id="L24">    private Long id;</span>
+<span class="fc" id="L22">    private Long id;</span>
 
     @NotBlank(message = &quot;Title darf nicht leer sein&quot;)
     @Size(min = 3, max = 100, message = &quot;Title muss zwischen 3 und 100 Zeichen lang sein&quot;)
     @Column(nullable = false, length = 100)
-<span class="fc" id="L29">    private String title;</span>
+<span class="fc" id="L27">    private String title;</span>
 
     @Size(max = 500, message = &quot;Description darf maximal 500 Zeichen lang sein&quot;)
     @Column(length = 500)
-<span class="nc" id="L33">    private String description;</span>
+<span class="nc" id="L31">    private String description;</span>
 
-<span class="pc" id="L35">    @Enumerated(EnumType.STRING)</span>
+<span class="pc" id="L33">    @Enumerated(EnumType.STRING)</span>
     @Column(nullable = false)
-<span class="fc" id="L37">    private TaskStatus status = TaskStatus.TODO;</span>
+<span class="fc" id="L35">    private TaskStatus status = TaskStatus.TODO;</span>
 
-<span class="pc" id="L39">    @Enumerated(EnumType.STRING)</span>
+<span class="pc" id="L37">    @Enumerated(EnumType.STRING)</span>
     @Column(nullable = false)
-<span class="fc" id="L41">    private Priority priority = Priority.MEDIUM;</span>
+<span class="fc" id="L39">    private Priority priority = Priority.MEDIUM;</span>
 
     @Column(name = &quot;deadline&quot;)
-<span class="nc" id="L44">    private LocalDateTime deadline;</span>
+<span class="nc" id="L42">    private LocalDateTime deadline;</span>
 
     @Column(name = &quot;created_at&quot;, nullable = false, updatable = false)
-<span class="nc" id="L47">    private LocalDateTime createdAt;</span>
+<span class="nc" id="L45">    private LocalDateTime createdAt;</span>
 
     @Column(name = &quot;updated_at&quot;)
-<span class="nc" id="L50">    private LocalDateTime updatedAt;</span>
+<span class="nc" id="L48">    private LocalDateTime updatedAt;</span>
 
-    /**
-     * Constructor für schnelles Erstellen von Tasks in Tests
-     */
-<span class="fc" id="L55">    public Task(String title) {</span>
-<span class="fc" id="L56">        this.title = title;</span>
-<span class="fc" id="L57">        this.status = TaskStatus.TODO;</span>
-<span class="fc" id="L58">        this.priority = Priority.MEDIUM;</span>
-<span class="fc" id="L59">        this.createdAt = LocalDateTime.now();</span>
-<span class="fc" id="L60">    }</span>
+<span class="fc" id="L50">    public Task(String title) {</span>
+<span class="fc" id="L51">        this.title = title;</span>
+<span class="fc" id="L52">        this.status = TaskStatus.TODO;</span>
+<span class="fc" id="L53">        this.priority = Priority.MEDIUM;</span>
+<span class="fc" id="L54">        this.createdAt = LocalDateTime.now();</span>
+<span class="fc" id="L55">    }</span>
 
-    /**
-     * Constructor mit Priorität
-     */
-<span class="fc" id="L65">    public Task(String title, Priority priority) {</span>
-<span class="fc" id="L66">        this.title = title;</span>
-<span class="fc" id="L67">        this.priority = priority;</span>
-<span class="fc" id="L68">        this.status = TaskStatus.TODO;</span>
-<span class="fc" id="L69">        this.createdAt = LocalDateTime.now();</span>
-<span class="fc" id="L70">    }</span>
+<span class="fc" id="L57">    public Task(String title, Priority priority) {</span>
+<span class="fc" id="L58">        this.title = title;</span>
+<span class="fc" id="L59">        this.priority = priority;</span>
+<span class="fc" id="L60">        this.status = TaskStatus.TODO;</span>
+<span class="fc" id="L61">        this.createdAt = LocalDateTime.now();</span>
+<span class="fc" id="L62">    }</span>
 
     @PrePersist
     protected void onCreate() {
-<span class="nc" id="L74">        createdAt = LocalDateTime.now();</span>
-<span class="nc" id="L75">        updatedAt = LocalDateTime.now();</span>
-<span class="nc" id="L76">    }</span>
+<span class="nc" id="L66">        createdAt = LocalDateTime.now();</span>
+<span class="nc" id="L67">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L68">    }</span>
 
     @PreUpdate
     protected void onUpdate() {
-<span class="nc" id="L80">        updatedAt = LocalDateTime.now();</span>
-<span class="nc" id="L81">    }</span>
+<span class="nc" id="L72">        updatedAt = LocalDateTime.now();</span>
+<span class="nc" id="L73">    }</span>
 
-    /**
-     * Prüft ob die Task überfällig ist
-     */
     public boolean isOverdue() {
-<span class="pc bpc" id="L87" title="1 of 4 branches missed.">        if (deadline == null || status == TaskStatus.DONE) {</span>
-<span class="fc" id="L88">            return false;</span>
+<span class="pc bpc" id="L76" title="1 of 4 branches missed.">        if (deadline == null || status == TaskStatus.DONE) {</span>
+<span class="fc" id="L77">            return false;</span>
         }
-<span class="fc" id="L90">        return LocalDateTime.now().isAfter(deadline);</span>
+<span class="fc" id="L79">        return LocalDateTime.now().isAfter(deadline);</span>
     }
 
-    /**
-     * Enum für Task Status
-     */
-<span class="fc" id="L96">    public enum TaskStatus {</span>
-<span class="fc" id="L97">        TODO(&quot;To Do&quot;),</span>
-<span class="fc" id="L98">        IN_PROGRESS(&quot;In Progress&quot;),</span>
-<span class="fc" id="L99">        DONE(&quot;Done&quot;);</span>
+<span class="fc" id="L82">    @Getter</span>
+    public enum TaskStatus {
+<span class="fc" id="L84">        TODO(&quot;To Do&quot;),</span>
+<span class="fc" id="L85">        IN_PROGRESS(&quot;In Progress&quot;),</span>
+<span class="fc" id="L86">        DONE(&quot;Done&quot;);</span>
 
-        private final String displayName;
+<span class="nc" id="L88">        private final String displayName;</span>
 
-<span class="fc" id="L103">        TaskStatus(String displayName) {</span>
-<span class="fc" id="L104">            this.displayName = displayName;</span>
-<span class="fc" id="L105">        }</span>
+<span class="fc" id="L90">        TaskStatus(String displayName) {</span>
+<span class="fc" id="L91">            this.displayName = displayName;</span>
+<span class="fc" id="L92">        }</span>
 
-        public String getDisplayName() {
-<span class="nc" id="L108">            return displayName;</span>
-        }
     }
 
-    /**
-     * Enum für Prioritäten
-     * Höherer Ordinal = Höhere Priorität
-     */
-<span class="fc" id="L116">    public enum Priority {</span>
-<span class="fc" id="L117">        LOW(1, &quot;Niedrig&quot;),</span>
-<span class="fc" id="L118">        MEDIUM(2, &quot;Mittel&quot;),</span>
-<span class="fc" id="L119">        HIGH(3, &quot;Hoch&quot;);</span>
+<span class="fc" id="L96">    @Getter</span>
+    public enum Priority {
+<span class="fc" id="L98">        LOW(1, &quot;Niedrig&quot;),</span>
+<span class="fc" id="L99">        MEDIUM(2, &quot;Mittel&quot;),</span>
+<span class="fc" id="L100">        HIGH(3, &quot;Hoch&quot;);</span>
 
-        private final int value;
-        private final String displayName;
+<span class="nc" id="L102">        private final int value;</span>
+<span class="nc" id="L103">        private final String displayName;</span>
 
-<span class="fc" id="L124">        Priority(int value, String displayName) {</span>
-<span class="fc" id="L125">            this.value = value;</span>
-<span class="fc" id="L126">            this.displayName = displayName;</span>
-<span class="fc" id="L127">        }</span>
+<span class="fc" id="L105">        Priority(int value, String displayName) {</span>
+<span class="fc" id="L106">            this.value = value;</span>
+<span class="fc" id="L107">            this.displayName = displayName;</span>
+<span class="fc" id="L108">        }</span>
 
-        public int getValue() {
-<span class="nc" id="L130">            return value;</span>
-        }
-
-        public String getDisplayName() {
-<span class="nc" id="L134">            return displayName;</span>
-        }
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
