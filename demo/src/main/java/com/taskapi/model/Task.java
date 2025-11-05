@@ -5,13 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * Task Entity - Repräsentiert eine Aufgabe im System
- */
 @Entity
 @Table(name = "tasks")
 @Data
@@ -49,9 +47,6 @@ public class Task {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    /**
-     * Constructor für schnelles Erstellen von Tasks in Tests
-     */
     public Task(String title) {
         this.title = title;
         this.status = TaskStatus.TODO;
@@ -59,9 +54,6 @@ public class Task {
         this.createdAt = LocalDateTime.now();
     }
 
-    /**
-     * Constructor mit Priorität
-     */
     public Task(String title, Priority priority) {
         this.title = title;
         this.priority = priority;
@@ -80,9 +72,6 @@ public class Task {
         updatedAt = LocalDateTime.now();
     }
 
-    /**
-     * Prüft ob die Task überfällig ist
-     */
     public boolean isOverdue() {
         if (deadline == null || status == TaskStatus.DONE) {
             return false;
@@ -90,9 +79,7 @@ public class Task {
         return LocalDateTime.now().isAfter(deadline);
     }
 
-    /**
-     * Enum für Task Status
-     */
+    @Getter
     public enum TaskStatus {
         TODO("To Do"),
         IN_PROGRESS("In Progress"),
@@ -104,15 +91,9 @@ public class Task {
             this.displayName = displayName;
         }
 
-        public String getDisplayName() {
-            return displayName;
-        }
     }
 
-    /**
-     * Enum für Prioritäten
-     * Höherer Ordinal = Höhere Priorität
-     */
+    @Getter
     public enum Priority {
         LOW(1, "Niedrig"),
         MEDIUM(2, "Mittel"),
@@ -126,12 +107,5 @@ public class Task {
             this.displayName = displayName;
         }
 
-        public int getValue() {
-            return value;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
     }
 }

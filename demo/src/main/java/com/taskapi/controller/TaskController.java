@@ -53,13 +53,12 @@ public class TaskController {
             throw new TaskNotFoundException(id);
         }
 
-        // Status, Title, Description, Priority updaten
         if (updatedTask.getTitle() != null) task.setTitle(updatedTask.getTitle());
         if (updatedTask.getDescription() != null) task.setDescription(updatedTask.getDescription());
         if (updatedTask.getStatus() != null) task.setStatus(updatedTask.getStatus());
         if (updatedTask.getPriority() != null) task.setPriority(updatedTask.getPriority());
 
-        Task saved = taskService.createTask(task); // Speichert aktualisierten Task
+        Task saved = taskService.createTask(task);
         return ResponseEntity.ok(saved);
     }
 
