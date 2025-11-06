@@ -1,4 +1,4 @@
-# 🧪 Testkonzept & Projektdokumentation – Task Management App
+# Testkonzept & Projektdokumentation – Task Management App
 
 **Autor:** Levin Wiederkehr & Albaraa Alasaad  
 **Modul:** M450 – Applikationen testen
